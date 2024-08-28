@@ -1,0 +1,19 @@
+{# inputs: 
+    data_product_team 
+#}
+
+{%- set developer_role = data_product_team ~ '_DEVELOPER' -%}
+{%- set admin_role = data_product_team ~ '_ADMIN' -%}
+
+{%- set dev_data_loader_role = 'DEV_' ~ data_product_team ~ '_DATA_LOADER' -%}
+{%- set uat_data_loader_role = 'UAT_' ~ data_product_team ~ '_DATA_LOADER' -%}
+{%- set prod_data_loader_role = 'PROD_' ~ data_product_team ~ '_DATA_LOADER' -%}
+
+{%- set dev_db = 'DEV_' ~ data_product_team -%}
+{%- set uat_db = 'UAT_' ~ data_product_team -%}
+{%- set prod_db = 'PROD_' ~ data_product_team -%}
+
+{%- set nonprod_wh = 'NONPROD_' ~ data_product_team ~ '_WH' -%}
+{%- set prod_wh = 'PROD_' ~ data_product_team ~ '_WH' -%}
+
+{% block content %}{% endblock %}

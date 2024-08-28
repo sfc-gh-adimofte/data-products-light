@@ -1,0 +1,60 @@
+{# inputs: 
+    data_product_team 
+#}
+
+{% extends 'data_product_team_namespace.sql.jinja' %}
+
+{% block content %}
+
+use role useradmin;
+
+create role if not exists {{ dev_data_loader_role }};
+create role if not exists {{ uat_data_loader_role }};
+create role if not exists {{ prod_data_loader_role }};
+
+grant role {{ dev_data_loader_role }} to role {{ developer_role }};
+
+grant role {{ dev_data_loader_role }} to role {{ admin_role }};
+grant role {{ uat_data_loader_role }} to role {{ admin_role }};
+grant role {{ prod_data_loader_role }} to role {{ admin_role }};
+
+grant role {{ developer_role }} to role {{ admin_role }};
+
+use role sysadmin;
+
+create database if not exists {{ dev_db }};
+create database if not exists {{ uat_db }};
+create database if not exists {{ prod_db }};
+
+create warehouse if not exists {{ nonprod_wh }}
+warehouse_size = XSMALL
+auto_suspend = 60
+initially_suspended = true
+;
+create warehouse if not exists {{ prod_wh }}
+warehouse_size = XSMALL
+auto_suspend = 60
+initially_suspended = true
+;
+
+grant usage on database {{ dev_db }} to role {{ dev_data_loader_role }};
+grant usage on database {{ dev_db }} to role {{ developer_role }};
+grant usage on database {{ dev_db }} to role {{ admin_role }};
+
+grant usage on database {{ uat_db }} to role {{ uat_data_loader_role }};
+grant usage on database {{ uat_db }} to role {{ developer_role }};
+grant usage on database {{ uat_db }} to role {{ admin_role }};
+
+grant usage on database {{ prod_db }} to role {{ prod_data_loader_role }};
+grant usage on database {{ prod_db }} to role {{ developer_role }};
+grant usage on database {{ prod_db }} to role {{ admin_role }};
+
+grant usage on warehouse {{ nonprod_wh }} to role {{ dev_data_loader_role }};
+grant usage on warehouse {{ nonprod_wh }} to role {{ uat_data_loader_role }};
+grant usage, operate on warehouse {{ nonprod_wh }} to role {{ developer_role }};
+grant usage, operate on warehouse {{ nonprod_wh }} to role {{ admin_role }};
+
+grant usage on warehouse {{ prod_wh }} to role {{ prod_data_loader_role }};
+grant usage, operate on warehouse {{ prod_wh }} to role {{ admin_role }};
+
+{% endblock %}

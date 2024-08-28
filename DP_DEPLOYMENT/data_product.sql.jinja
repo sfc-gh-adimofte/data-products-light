@@ -1,0 +1,50 @@
+{# inputs: 
+    data_product_team 
+    data_product
+#}
+
+{% extends 'data_product_team_namespace.sql.jinja' %}
+
+{% block content %}
+
+{%- set bus_layer = data_product ~ '_BUS' -%}
+{%- set dp_layer = data_product ~ '_DP' -%}
+
+{%- set dp_consumer_role = data_product_team ~ '_' ~ data_product ~ '_DP' -%}
+
+use role accountadmin;
+
+grant role {{ dp_consumer_role }} to role {{ developer_role }};
+
+create schema if not exists {{ dev_db }}.{{ bus_layer }} with managed access;
+create schema if not exists {{ dev_db }}.{{ dp_layer }} with managed access;
+
+create schema if not exists {{ uat_db }}.{{ bus_layer }} with managed access;
+create schema if not exists {{ uat_db }}.{{ dp_layer }} with managed access;
+
+create schema if not exists {{ prod_db }}.{{ bus_layer }} with managed access;
+create schema if not exists {{ prod_db }}.{{ dp_layer }} with managed access;
+
+grant usage on database {{ uat_db }} to role {{ dp_consumer_role }};
+grant usage on database {{ prod_db }} to role {{ dp_consumer_role }};
+grant usage on schema {{ uat_db }}.{{ dp_layer }} to role {{ dp_consumer_role }};
+grant usage on schema {{ prod_db }}.{{ dp_layer }} to role {{ dp_consumer_role }};
+
+grant select on all tables in schema {{ uat_db }}.{{ dp_layer }} to role {{ dp_consumer_role }};
+grant select on all views in schema {{ uat_db }}.{{ dp_layer }} to role {{ dp_consumer_role }};
+grant select on future tables in schema {{ uat_db }}.{{ dp_layer }} to role {{ dp_consumer_role }};
+grant select on future views in schema {{ uat_db }}.{{ dp_layer }} to role {{ dp_consumer_role }};
+
+grant select on all tables in schema {{ prod_db }}.{{ dp_layer }} to role {{ dp_consumer_role }};
+grant select on all views in schema {{ prod_db }}.{{ dp_layer }} to role {{ dp_consumer_role }};
+grant select on future tables in schema {{ prod_db }}.{{ dp_layer }} to role {{ dp_consumer_role }};
+grant select on future views in schema {{ prod_db }}.{{ dp_layer }} to role {{ dp_consumer_role }};
+
+grant ownership on schema {{ dev_db }}.{{ bus_layer }} to role {{ admin_role }} copy current grants;
+grant ownership on schema {{ dev_db }}.{{ dp_layer }} to role {{ admin_role }} copy current grants;
+grant ownership on schema {{ uat_db }}.{{ bus_layer }} to role {{ admin_role }} copy current grants;
+grant ownership on schema {{ uat_db }}.{{ dp_layer }} to role {{ admin_role }} copy current grants;
+grant ownership on schema {{ prod_db }}.{{ bus_layer }} to role {{ admin_role }} copy current grants;
+grant ownership on schema {{ prod_db }}.{{ dp_layer }} to role {{ admin_role }} copy current grants;
+
+{% endblock %}

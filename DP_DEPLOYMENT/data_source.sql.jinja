@@ -1,0 +1,61 @@
+{# inputs: 
+    data_product_team 
+    data_source
+#}
+
+{% extends 'data_product_team_namespace.sql.jinja' %}
+
+{% block content %}
+
+{%- set psa_layer = data_source ~ '_PSA' -%}
+{%- set hist_layer = data_source ~ '_HIST' -%}
+{%- set struct_layer = data_source ~ '_STRUCT' -%}
+
+use role accountadmin;
+
+create schema if not exists {{ dev_db }}.{{ psa_layer }} with managed access;
+create schema if not exists {{ dev_db }}.{{ hist_layer }} with managed access;
+create schema if not exists {{ dev_db }}.{{ struct_layer }} with managed access;
+
+create schema if not exists {{ uat_db }}.{{ psa_layer }} with managed access;
+create schema if not exists {{ uat_db }}.{{ hist_layer }} with managed access;
+create schema if not exists {{ uat_db }}.{{ struct_layer }} with managed access;
+
+create schema if not exists {{ prod_db }}.{{ psa_layer }} with managed access;
+create schema if not exists {{ prod_db }}.{{ hist_layer }} with managed access;
+create schema if not exists {{ prod_db }}.{{ struct_layer }} with managed access;
+
+revoke ownership on future tables in schema {{ dev_db }}.{{ psa_layer }} from role {{ admin_role }};
+revoke ownership on future tables in schema {{ uat_db }}.{{ psa_layer }} from role {{ admin_role }};
+revoke ownership on future tables in schema {{ prod_db }}.{{ psa_layer }} from role {{ admin_role }};
+
+grant ownership on schema {{ dev_db }}.{{ psa_layer }} to role {{ admin_role }} copy current grants;
+grant ownership on schema {{ dev_db }}.{{ hist_layer }} to role {{ admin_role }} copy current grants;
+grant ownership on schema {{ dev_db }}.{{ struct_layer }} to role {{ admin_role }} copy current grants;
+grant ownership on schema {{ uat_db }}.{{ psa_layer }} to role {{ admin_role }} copy current grants;
+grant ownership on schema {{ uat_db }}.{{ hist_layer }} to role {{ admin_role }} copy current grants;
+grant ownership on schema {{ uat_db }}.{{ struct_layer }} to role {{ admin_role }} copy current grants;
+grant ownership on schema {{ prod_db }}.{{ psa_layer }} to role {{ admin_role }} copy current grants;
+grant ownership on schema {{ prod_db }}.{{ hist_layer }} to role {{ admin_role }} copy current grants;
+grant ownership on schema {{ prod_db }}.{{ struct_layer }} to role {{ admin_role }} copy current grants;
+
+grant ownership on all tables in schema {{ dev_db }}.{{ psa_layer }} to role {{ admin_role }};
+grant ownership on future tables in schema {{ dev_db }}.{{ psa_layer }} to role {{ admin_role }};
+
+grant usage on schema {{ uat_db }}.{{ psa_layer }} to role {{ uat_data_loader_role }};
+grant create table on schema {{ uat_db }}.{{ psa_layer }} to role {{ uat_data_loader_role }};
+grant all privileges on all tables in schema {{ uat_db }}.{{ psa_layer }} to role {{ uat_data_loader_role }};
+grant all privileges on future tables in schema {{ uat_db }}.{{ psa_layer }} to role {{ uat_data_loader_role }};
+
+grant ownership on all tables in schema {{ uat_db }}.{{ psa_layer }} to role {{ admin_role }};
+grant ownership on future tables in schema {{ uat_db }}.{{ psa_layer }} to role {{ admin_role }};
+
+grant usage on schema {{ prod_db }}.{{ psa_layer }} to role {{ prod_data_loader_role }};
+grant create table on schema {{ prod_db }}.{{ psa_layer }} to role {{ prod_data_loader_role }};
+grant all privileges on all tables in schema {{ prod_db }}.{{ psa_layer }} to role {{ prod_data_loader_role }};
+grant all privileges on future tables in schema {{ prod_db }}.{{ psa_layer }} to role {{ prod_data_loader_role }};
+
+grant ownership on all tables in schema {{ prod_db }}.{{ psa_layer }} to role {{ admin_role }};
+grant ownership on future tables in schema {{ prod_db }}.{{ psa_layer }} to role {{ admin_role }};
+
+{% endblock %}
